@@ -1,0 +1,158 @@
+--  Table and value creation.
+--  CPSC 304 Project.
+--  Yaosheng Cheng 17760885 j1a4n;
+--  Meihui Li 71346266 j7b7d;
+--  Huiwen Zuo 56841521 n7l4u;
+
+--  First drop any existing tables.
+DROP TABLE forumTable cascade constraints;
+DROP TABLE subForumTable cascade constraints;
+DROP TABLE loginTable cascade constraints; 
+DROP TABLE adminTable cascade constraints;
+DROP TABLE moderatorTable cascade constraints;
+DROP TABLE threadTable cascade constraints;
+DROP TABLE postTable cascade constraints;
+DROP TABLE favoriteListTable cascade constraints;
+DROP TABLE tagTable cascade constraints;
+
+--  Add each table.
+
+--  Forum (Domain, Forum Name)
+CREATE TABLE forumTable (
+    domainAddr char(30) PRIMARY KEY, 
+    fname char(30)
+    );
+
+--  Sub-forum (Sub-forum ID, Domain, Sub-forum Name, Topic) 
+CREATE TABLE subForumTable (
+    subId int PRIMARY KEY, 
+    subName char(30), 
+    subTopic char(30), 
+    subDomain char(30), 
+    Foreign Key (subDomain) REFERENCES forumTable(domainAddr) ON DELETE CASCADE
+    );
+
+--  User (User ID, Name)
+CREATE TABLE loginTable (
+    id int PRIMARY KEY, 
+    uname char(30)
+    );
+
+--  Admin (User ID, Name, Domain, Admin ID) (Domain cannot be null)
+CREATE TABLE adminTable (
+    adminUserId int PRIMARY KEY, 
+    adminId int, 
+    uname char(30), 
+    adminDomain char(30), 
+    Foreign Key (adminDomain) REFERENCES forumTable(domainAddr) ON DELETE CASCADE
+    );
+
+--  Moderator (User ID, Name, Moderator ID)
+CREATE TABLE moderatorTable (
+    mUserId int PRIMARY KEY, 
+    mname char(30), 
+    moderatorId int
+    );
+
+--  Thread (Thread ID, Title, User ID, Sub-forum ID, ThreadPostTime) (User ID and Sub-forum ID cannot be null)
+CREATE TABLE threadTable (
+    threadID int PRIMARY KEY, 
+    title char(30), 
+    userID int NOT NULL, 
+    subForumID int NOT NULL, 
+    threadPostTime date, 
+    Foreign Key(userID) REFERENCES loginTable(ID) ON DELETE CASCADE, 
+    Foreign Key(subForumID) REFERENCES subForumTable(subId) ON DELETE CASCADE
+    );
+
+--  Post (Post ID, Content, User ID, Thread ID, PostPostTime) (User ID cannot be null)
+CREATE TABLE postTable (
+    postID int PRIMARY KEY, 
+    content char(30), 
+    userID int NOT NULL, 
+    threadID int NOT NULL, 
+    postPostTime date, 
+    Foreign Key(userID) REFERENCES loginTable(ID) ON DELETE CASCADE, 
+    Foreign Key(threadID) REFERENCES threadTable(threadID) ON DELETE CASCADE
+    );
+
+--  Favorites List(List ID, User ID)
+CREATE TABLE favoriteListTable (
+    listID int PRIMARY KEY, 
+    userID int NOT NULL, 
+    Foreign Key(userID) REFERENCES loginTable(ID) ON DELETE CASCADE
+    );
+
+--  Tag (Tag ID, Description)
+CREATE TABLE tagTable (
+    tagID int PRIMARY KEY, 
+    descrip char(30)
+    );
+
+--  Add tuples into each table
+
+--  Add in the forum
+insert into forumTable values('www.douban.com', 'douban');
+insert into forumTable values('www.reddit.com', 'reddit');
+
+--  Add in the subforum
+insert into subForumTable values(1, 'explode the kitchen', 'cooking', 'www.douban.com');
+insert into subForumTable values(2, 'ugly fashion', 'fashion', 'www.douban.com');
+insert into subForumTable values(3, 'douban elephant', 'gossip', 'www.douban.com');
+insert into subForumTable values(4, 'UBC', 'school', 'www.reddit.com');
+insert into subForumTable values(5, 'gaybros', 'lgbt', 'www.reddit.com');
+insert into subForumTable values(6, 'popheads', 'music', 'www.reddit.com');
+
+--  Add in the user
+insert into loginTable values(1, 'Abby');
+insert into loginTable values(2, 'Betty');
+insert into loginTable values(3, 'Cindy');
+insert into loginTable values(4, 'David');
+insert into loginTable values(5, 'Emily');
+insert into loginTable values(6, 'Frank');
+insert into loginTable values(7, 'Grace');
+insert into loginTable values(8, 'Helen');
+insert into loginTable values(9, 'Ieren');
+insert into loginTable values(10, 'Jack');
+
+--  Add in the admin
+insert into adminTable values(11, 1, 'Simu', 'www.douban.com');
+insert into adminTable values(12, 2, 'Xi', 'www.douban.com');
+insert into adminTable values(13, 3, 'Anna', 'www.reddit.com');
+insert into adminTable values(14, 4, 'Pikachu', 'www.reddit.com');
+
+--  Add in the moderator
+insert into moderatorTable values(1, 'abc', 1);
+insert into moderatorTable values(2, 'cba', 2);
+insert into moderatorTable values(3, 'bbb', 3);
+
+--  Add in the thread
+insert into threadTable values(1, 'UBC tuition', 1, 1, SYSDATE);
+insert into threadTable values(2, 'I love you', 1, 2, SYSDATE);
+insert into threadTable values(3, 'Hi', 1, 3, SYSDATE);
+insert into threadTable values(4, 'Nice', 1, 4, SYSDATE);
+insert into threadTable values(5, 'Great', 1, 5, SYSDATE);
+insert into threadTable values(6, 'Hola', 1, 6, SYSDATE);
+insert into threadTable values(7, 'GOGO', 10, 4, SYSDATE);
+insert into threadTable values(8, 'ABBN', 6, 5, SYSDATE);
+
+--  Add in the post
+insert into postTable values(1, 'ASD', 2, 1, SYSDATE);
+insert into postTable values(2, 'ASD', 5, 1, SYSDATE);
+insert into postTable values(3, 'ASD', 10, 1, SYSDATE);
+insert into postTable values(4, 'ASD', 4, 1, SYSDATE);
+insert into postTable values(5, 'ASD', 1, 7, SYSDATE);
+insert into postTable values(6, 'ASD', 3, 7, SYSDATE);
+insert into postTable values(7, 'ASD', 9, 8, SYSDATE);
+
+--  Add in the favorite list
+insert into favoriteListTable values(1, 1);
+insert into favoriteListTable values(2, 1);
+insert into favoriteListTable values(3, 2);
+insert into favoriteListTable values(4, 5);
+
+--  Add in the tag
+insert into tagTable values(1, 'shitpost');
+insert into tagTable values(2, 'NSFW');
+insert into tagTable values(3, 'trigger warning');
+
